@@ -7,13 +7,18 @@ RUN apt-get update &&\
     x11-xserver-utils \
     xinit \
     xinput \
+    imwheel \
     pulseaudio \
+    pulseeffects \
     lightdm \
     lightdm-gtk-greeter \
-    i3 \
+    light-locker \
+    i3-wm \
     polybar \
+    dunst \
     picom \
     rofi \
+    flameshot \
     kitty \
     neovim \
     ranger \
@@ -30,3 +35,4 @@ RUN echo '#!/bin/bash' >> /desktop.sh &&\
     echo 'systemctl start dbus.service' >> /desktop.sh &&\
     echo 'while [ -z $(pidof lightdm) ]; do lightdm && sleep 1; done' >> /desktop.sh &&\
     chmod +x /desktop.sh
+VOLUME /volume
