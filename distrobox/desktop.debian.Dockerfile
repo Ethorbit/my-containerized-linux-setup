@@ -30,9 +30,8 @@ RUN apt-get update &&\
     pipx install autotiling &&\
     pipx install i3-resurrect
 FROM install AS desktop
-RUN echo '#!/bin/bash' >> /desktop.sh &&\
-    echo 'systemctl unmask dbus.service' >> /desktop.sh &&\
-    echo 'systemctl start dbus.service' >> /desktop.sh &&\
-    echo 'while [ -z $(pidof lightdm) ]; do lightdm && sleep 1; done' >> /desktop.sh &&\
-    chmod +x /desktop.sh
+COPY ./scripts/persist.sh /
+COPY ./scripts/desktop.debian/start.sh /
+RUN chmod +x /persist.sh &&\
+    chmod +x /start.sh
 VOLUME /volume
