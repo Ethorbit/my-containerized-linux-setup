@@ -32,7 +32,7 @@ RUN apt-get update &&\
     pipx install i3-resurrect
 FROM install AS desktop
 COPY ./scripts/persist.sh /
-COPY ./scripts/desktop.debian/start.sh /
+COPY ./scripts/desktop.debian.sh /
 RUN chmod +x /persist.sh &&\
-    chmod +x /start.sh
+    chmod +x /desktop.debian.sh
 VOLUME /volume
