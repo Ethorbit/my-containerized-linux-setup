@@ -4,6 +4,7 @@ ARG PIPX_HOME=/opt/pipx
 ARG PIPX_BIN_DIR=/usr/local/bin
 RUN apt-get update &&\
     apt-get install -y systemd \
+    ssh-client \
     x11-xserver-utils \
     xinit \
     xinput \
