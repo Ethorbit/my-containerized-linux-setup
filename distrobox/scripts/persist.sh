@@ -7,3 +7,4 @@ for i in "$@"; do
 		ln -s "/volume/$i" "$i"
 	fi
 done
+

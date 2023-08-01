@@ -31,8 +31,11 @@ RUN apt-get update &&\
     pipx install autotiling &&\
     pipx install i3-resurrect
 FROM install AS desktop
+ENV DISTRO=debian
 COPY ./scripts/persist.sh /
-COPY ./scripts/desktop.debian.sh /
+COPY ./scripts/desktop.sh /
+COPY ./services/desktop.service /etc/systemd/system/
 RUN chmod +x /persist.sh &&\
-    chmod +x /desktop.debian.sh
+    chmod +x /desktop.sh &&\
+    systemctl enable desktop.service
 VOLUME /volume
