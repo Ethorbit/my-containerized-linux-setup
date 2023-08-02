@@ -3,7 +3,8 @@ for i in "$@"; do
 	if [ ! -L "$i" ]; then
 		base=$(dirname "$i")
 		mkdir -p "/volume/$base"
-		mv "$i" "/volume/$i"
+		cp -rapn "$i" "/volume/$i"
+		rm -dr "$i"
 		ln -s "/volume/$i" "$i"
 	fi
 done
