@@ -11,7 +11,9 @@
 # Start the desktop
 systemctl unmask dbus.service
 systemctl start dbus.service
-while [ -z $(pidof lightdm) ]; do 
-	lightdm
-	sleep 0.1
-done
+exec lightdm
+
+#while [ -z $(pidof lightdm) ]; do 
+#	lightdm
+#	sleep 0.1
+#done
