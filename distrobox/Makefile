@@ -1,10 +1,42 @@
 # docker or podman
 TOOL := podman
-# Important! If you're using a NVIDIA gpu, set to 1. You need nvidia-container-runtime and nvidia-smi.
+# Important! If you're using a NVIDIA gpu, set to 1. Otherwise 0.
 NVIDIA := 1
 # Directory that is mounted to container's /volume dir
 STORAGE := /opt/distrobox
 
+
+CHECK_ROOT := $(shell [ "$(id -u)" -eq 0 ] && echo 1)
+ifneq ($(CHECK_ROOT),)
+$(error Do not run as root. Use a sudoer user instead)
+endif
+
+CHECK_SUDO := $(shell command -v sudo)
+ifeq ($(CHECK_SUDO),)
+$(error You need sudo and you need to be a sudoer)
+endif
+
+CHECK_TOOL := $(shell command -v $(TOOL))
+ifeq ($(CHECK_TOOL),)
+$(error You need $(TOOL))
+endif
+
+CHECK_DISTROBOX := $(shell command -v distrobox)
+ifeq ($(CHECK_DISTROBOX),)
+$(error You need distrobox)
+endif
+
+ifneq ($(MAKECMDGOALS), base)
+ifeq ($(DISTRO),)
+$(error DISTRO variable is not set)
+endif
+
+DOCKER_FILE := $(MAKECMDGOALS).$(DISTRO).Dockerfile
+CHECK_DOCKER_FILE := $(shell [ -f "$(DOCKER_FILE)" ] && echo 1)
+ifeq ($(CHECK_DOCKER_FILE),)
+$(error $(DOCKER_FILE) doesn't exist)
+endif
+endif
 
 CHECK_NVIDIA_RUNTIME := $(shell command -v nvidia-container-runtime)
 CHECK_NVIDIA_SMI := $(shell command -v nvidia-smi)
@@ -27,10 +59,6 @@ ifeq ($(CHECK_STORAGE),)
 $(error $(STORAGE) does not exist.)
 endif
 
-ifeq ($(DISTRO),)
-$(error DISTRO variable is not set.)
-endif
-
 HOME_DIR := $(shell echo $$HOME)
 
 define set_root
@@ -42,10 +70,6 @@ endef
 define set_init_hook
 $(eval INIT_HOOKS := --init-hooks "$(1)")
 endef
-
-#define set_additional_flags
-#$(eval ADDITIONAL_FLAGS := --additional-flags "$(1)")
-#endef
 
 define add_additional_flag
 $(eval ADDITIONAL_FLAGS := $(ADDITIONAL_FLAGS) $(1))
@@ -74,11 +98,16 @@ define setup_additional_flags
 		$(call add_additional_flag, -e NVIDIA_DRIVER_CAPABILITIES=all))
 endef
 
+define setup_volume_maps
+	$(call add_volume_map, /lib/modules:/lib/modules:ro)
+endef
+
 define setup_paths
 $(eval STORAGE_PATH := $(STORAGE)/$@.$(DISTRO))
 $(shell [ ! -d "$(STORAGE_PATH)" ] && sudo mkdir -p "$(STORAGE_PATH)" &&\
 	 [ -z "$(SUDO)" ] && sudo chown "${USER}":"${USER}" "$(STORAGE_PATH)")
 $(eval VOLUME_MAPS := --volume "$(STORAGE_PATH)":/volume $(VOLUME_MAPS))
+$(call setup_volume_maps)
 endef
 
 define make_container
@@ -93,16 +122,20 @@ endef
 # Builds all the 'base' images
 BASES_DIR := $(CURDIR)/bases
 BASE_FILES := $(shell ls bases/*.Dockerfile)
+
+define build_bases
+for f in $(BASE_FILES); do \
+filename="$$(basename $$f .Dockerfile)" &&\
+IFS=. read -r image tag <<< "$$filename" &&\
+$(TOOL) build $(BUILD_ARGS) -t my-base:$${image}-$${tag} --file "$$f" || exit 1; done
+endef
+
 base: $(BASE_FILES)
 	$(call setup_build_args)
-	for f in $(BASE_FILES); do \
-	filename="$$(basename $$f .Dockerfile)" &&\
-	IFS='.' read -r image tag <<< "$$filename" &&\
-	$(SUDO) $(TOOL) build $(BUILD_ARGS) -t my-base:$${image}-$${tag} --file "$$f" || exit 1; done &&\
-	touch $@
+	/bin/bash -c '$(build_bases)' && sudo /bin/bash -c '$(build_bases)' && touch $@
 	$(eval BUILD_ARGS :=)
 
-# For now desktop runs as root because no one has a solution for running Xorg with rootless Podman
+# Desktop runs as root because no one has a solution for running Xorg with rootless Podman
 .PHONY: desktop
 desktop: base
 	$(call set_root)
@@ -110,24 +143,10 @@ desktop: base
 	$(call make_container)
 	distrobox-enter $(ROOT) $@ -- distrobox-export --bin /$@.sh
 
-.PHONY: flatpak
-flatpak: base
-	$(call setup_paths)
-	$(call make_container)
-	distrobox-enter $(ROOT) $@ -- distrobox-export --bin /usr/bin/$@
-
-.PHONY: snap
-snap: base
-	$(call setup_paths)
-	$(call make_container)
-	distrobox-enter $(ROOT) $@ -- sudo /install-$@s.sh &&\
-	distrobox-enter $(ROOT) $@ -- distrobox-export --bin /usr/bin/$@ ||\
-	distrobox-rm -f $(ROOT) $@ 2> /dev/null
-
-.PHONY: games
-games: base
-	$(call setup_paths)
-	$(call make_container)
+#.PHONY: games
+#games: base
+#	$(call setup_paths)
+#	$(call make_container)
 
 .PHONY: clitools
 clitools: base
@@ -136,5 +155,6 @@ clitools: base
 
 .PHONY: virtualization
 virtualization: base
+	$(call set_root)
 	$(call setup_paths)
 	$(call make_container)
