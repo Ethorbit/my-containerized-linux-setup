@@ -1,0 +1,159 @@
+# Gstreamer doesn't work on Firefox, use a chromium browser to connect.
+version: "3.8"
+
+x-egl-desktop: &egl-desktop
+  #build:
+  #  context: ./nvidia-egl-desktop
+  image: ghcr.io/selkies-project/nvidia-egl-desktop:latest
+  cap_add:
+    - SYS_NICE
+  networks:
+    - desktop
+  volumes:
+    - type: tmpfs
+      target: /dev/shm:rw
+    - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+    - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+    - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+    - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+    - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+    - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+    - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
+  restart: unless-stopped
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+x-egl-desktop-labels: &egl-desktop-labels
+  traefik.enable: true
+x-egl-desktop-env: &egl-desktop-env
+  TZ: ${HOST_TIMEZONE}
+  WEBRTC_ENCODER: nvh264enc
+  SIZEW: 1920
+  SIZEH: 1080
+  REFRESH: 60
+  DPI: 96
+  CDEPTH: 24
+  TURN_HOST: ${HOST_LOCAL_IPV4}
+  TURN_PORT: 3478
+  TURN_PROTOCOL: udp
+  TURN_TLS: false
+  TURN_SHARED_SECRET: ${TURN_SECRET}
+
+services:
+  coturn-server:
+    container_name: coturn-server
+    image: coturn/coturn:latest
+    network_mode: host
+    cpuset: 19-23
+    expose:
+      - 3478:3478/tcp
+      - 3478:3478/udp
+      - 49160-49200:49160-49200/udp
+    command: |
+     -n
+     -v
+     --realm=localhost
+     --fingerprint
+     --listening-ip=0.0.0.0
+     --listening-port=3478
+     --external-ip=${HOST_LOCAL_IPV4}
+     --relay-ip=${HOST_LOCAL_IPV4}
+     --allow-loopback-peers
+     --min-port=49160
+     --max-port=49200
+     --use-auth-secret
+     --static-auth-secret='${TURN_SECRET}'
+     --log-file=stdout
+     --no-cli
+     --no-tls
+     --no-dtls
+    restart: unless-stopped
+  
+  traefik:
+    container_name: traefik
+    image: traefik:v2.5
+    network_mode: host
+    command:
+      --api.dashboard=false
+      --providers.docker=true
+      --providers.docker.exposedbydefault=false
+      --entrypoints.web.address=:80
+    labels:
+      traefik.enable: true
+    cpuset: 19-23
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  desktop-development:
+    container_name: desktop-development
+    <<: [ *egl-desktop ]
+    labels:
+      <<: [ *egl-desktop-labels ]
+      description: Software Development
+      traefik.http.routers.9090.rule: Host(`desktop.development.${DOMAIN_NAME}`)
+    environment:
+      <<: [ *egl-desktop-env ]
+      PASSWD: ${DESKTOP_DEVELOPMENT_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_DEVELOPMENT_PASSWORD}
+    cpuset: 2-10
+    cpus: 23
+    ports:
+      - 9090:8080/tcp
+
+  desktop-socials:
+    container_name: desktop-socials
+    <<: [ *egl-desktop ]
+    labels:
+      <<: [ *egl-desktop-labels ]
+      description: Social Media accounts / Browsing
+      traefik.http.routers.9091.rule: Host(`desktop.socials.${DOMAIN_NAME}`)
+    environment:
+      <<: [ *egl-desktop-env ]
+      PASSWD: ${DESKTOP_SOCIALS_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_SOCIALS_PASSWORD}
+    cpuset: 11-14
+    ports:
+      - 9091:8080/tcp
+
+  desktop-shopping:
+    container_name: desktop-shopping
+    <<: [ *egl-desktop ]
+    labels:
+      <<: [ *egl-desktop-labels ]
+      description: Banking, transactions, etc
+      traefik.http.routers.9092.rule: Host(`desktop.shopping.${DOMAIN_NAME}`)
+    environment:
+      <<: [ *egl-desktop-env ]
+      PASSWD: ${DESKTOP_SHOPPING_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_SHOPPING_PASSWORD}
+    cpuset: 11-14
+    ports:
+      - 9092:8080/tcp
+
+  desktop-media:
+    container_name: desktop-media
+    <<: [ *egl-desktop ]
+    labels:
+      <<: [ *egl-desktop-labels ]
+      description: Torrenting / Mediacenter, Download and Play local media files
+      traefik.http.routers.9093.rule: Host(`desktop.media.${DOMAIN_NAME}`)
+    environment:
+      <<: [ *egl-desktop-env ]
+      PASSWD: ${DESKTOP_MEDIA_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_MEDIA_PASSWORD}
+    cpuset: 15-18
+    ports:
+      - 9093:8080/tcp
+
+networks:
+  desktop:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+          gateway: 172.25.0.1

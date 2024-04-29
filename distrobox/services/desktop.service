@@ -1,8 +1,0 @@
-[Unit]
-Description=Preserves flatpak paths to volume
-
-[Service]
-ExecStart=/desktop.sh
-
-[Install]
-WantedBy=default.target
