@@ -1,12 +1,9 @@
-# Gstreamer doesn't work on Firefox, use a chromium browser to connect.
+# Selkies-GStreamer doesn't work on Firefox, use a chromium browser to connect.
 version: "3.8"
 
 x-egl-desktop: &egl-desktop
-  #build:
-  #  context: ./nvidia-egl-desktop
-  image: ghcr.io/selkies-project/nvidia-egl-desktop:latest
-  cap_add:
-    - SYS_NICE
+  build:
+    context: ./nvidia-egl-desktop
   networks:
     - desktop
   volumes:
@@ -48,7 +45,7 @@ services:
     container_name: coturn-server
     image: coturn/coturn:latest
     network_mode: host
-    cpuset: 19-23
+    cpuset: 20-23
     expose:
       - 3478:3478/tcp
       - 3478:3478/udp
@@ -84,7 +81,7 @@ services:
       --entrypoints.web.address=:80
     labels:
       traefik.enable: true
-    cpuset: 19-23
+    cpuset: 20-23
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
@@ -100,8 +97,7 @@ services:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_DEVELOPMENT_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_DEVELOPMENT_PASSWORD}
-    cpuset: 2-10
-    cpus: 23
+    cpuset: 2-11
     ports:
       - 9090:8080/tcp
 
@@ -116,22 +112,23 @@ services:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_SOCIALS_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_SOCIALS_PASSWORD}
-    cpuset: 11-14
+    cpuset: 12-15
     ports:
       - 9091:8080/tcp
 
-  desktop-shopping:
-    container_name: desktop-shopping
+  desktop-finance:
+    container_name: desktop-finance
     <<: [ *egl-desktop ]
     labels:
       <<: [ *egl-desktop-labels ]
       description: Banking, transactions, etc
-      traefik.http.routers.9092.rule: Host(`desktop.shopping.${DOMAIN_NAME}`)
+      traefik.http.routers.9092.rule: Host(`desktop.finance.${DOMAIN_NAME}`)
     environment:
       <<: [ *egl-desktop-env ]
-      PASSWD: ${DESKTOP_SHOPPING_PASSWORD}
-      BASIC_AUTH_PASSWORD: ${DESKTOP_SHOPPING_PASSWORD}
-    cpuset: 11-14
+      PASSWD: ${DESKTOP_FINANCE_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_FINANCE_PASSWORD}
+    cpuset: 12-15
+    cpus: 4
     ports:
       - 9092:8080/tcp
 
@@ -146,7 +143,7 @@ services:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_MEDIA_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_MEDIA_PASSWORD}
-    cpuset: 15-18
+    cpuset: 16-19
     ports:
       - 9093:8080/tcp
 
