@@ -1,0 +1,11 @@
+[Unit]
+Description=Systemd port of nvidia-egl-docker's 'entrypoint' supervisor service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/entrypoint.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

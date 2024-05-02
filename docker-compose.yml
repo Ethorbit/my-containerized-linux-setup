@@ -1,21 +1,14 @@
-# Selkies-GStreamer doesn't work on Firefox, use a chromium browser to connect.
 version: "3.8"
 
 x-egl-desktop: &egl-desktop
+  runtime: sysbox-runc
   build:
     context: ./nvidia-egl-desktop
+    target: kdeplasma
+    #args:
+      #KERNEL_VERSION: ${KERNEL_VERSION}
   networks:
     - desktop
-  volumes:
-    - type: tmpfs
-      target: /dev/shm:rw
-    - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
-    - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
-    - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
-    - /var/lib/lxcfs/proc/stat:/proc/stat:rw
-    - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
-    - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
-    - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
   restart: unless-stopped
   deploy:
     resources:
@@ -86,8 +79,9 @@ services:
     restart: unless-stopped
 
   desktop-development:
-    container_name: desktop-development
     <<: [ *egl-desktop ]
+    container_name: desktop-development
+    hostname: desktop-development
     labels:
       <<: [ *egl-desktop-labels ]
       description: Software Development
@@ -101,10 +95,21 @@ services:
     cpuset: 2-11
     ports:
       - 9090:8080/tcp
+    volumes:
+      - type: tmpfs
+        target: /dev/shm:rw
+      - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+      - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+      - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+      - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+      - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+      - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+      - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
 
   desktop-socials:
-    container_name: desktop-socials
     <<: [ *egl-desktop ]
+    container_name: desktop-socials
+    hostname: desktop-socials
     labels:
       <<: [ *egl-desktop-labels ]
       description: Social Media accounts / Browsing
@@ -118,10 +123,21 @@ services:
     cpuset: 12-15
     ports:
       - 9091:8080/tcp
+    volumes:
+      - type: tmpfs
+        target: /dev/shm:rw
+      - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+      - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+      - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+      - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+      - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+      - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+      - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
 
   desktop-finance:
-    container_name: desktop-finance
     <<: [ *egl-desktop ]
+    container_name: desktop-finance
+    hostname: desktop-finance
     labels:
       <<: [ *egl-desktop-labels ]
       description: Banking, transactions, etc
@@ -135,10 +151,21 @@ services:
     cpuset: 12-15
     ports:
       - 9092:8080/tcp
+    volumes:
+      - type: tmpfs
+        target: /dev/shm:rw
+      - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+      - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+      - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+      - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+      - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+      - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+      - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
 
   desktop-media:
-    container_name: desktop-media
     <<: [ *egl-desktop ]
+    container_name: desktop-media
+    hostname: desktop-media
     labels:
       <<: [ *egl-desktop-labels ]
       description: Torrenting / Mediacenter, Download and Play local media files
@@ -152,6 +179,16 @@ services:
     cpuset: 16-19
     ports:
       - 9093:8080/tcp
+    volumes:
+      - type: tmpfs
+        target: /dev/shm:rw
+      - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+      - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+      - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+      - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+      - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+      - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+      - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
 
 networks:
   desktop:
