@@ -19,7 +19,9 @@ RUN apt-get update -y &&\
         flatpak \
         git \
         wget \
-        curl
+        curl \
+        iputils-ping \
+        lsof
 
 # Basically a port of nestybox/ubuntu-jammy-systemd-docker:latest
 FROM base AS sysbox-systemd-docker
@@ -43,7 +45,10 @@ RUN echo "Installing systemd" &&\
     systemd-udevd-control.socket \
     systemd-modules-load.service \
     sys-kernel-debug.mount \
-    sys-kernel-tracing.mount &&\
+    sys-kernel-tracing.mount \
+    upower.service \
+    systemd-logind.service \
+    systemd-resolved.service &&\
     echo "Installing docker" &&\
     curl -fsSL https://get.docker.com -o get-docker.sh &&\
     sh get-docker.sh &&\
