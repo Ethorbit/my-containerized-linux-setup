@@ -44,8 +44,9 @@ services:
       --providers.docker.exposedbydefault=false
       --entrypoints.web.address=:80
       --entrypoints.websecure.address=:443
-    labels:
-      traefik.enable: true
+      --entrypoints.web.http.redirections.entryPoint.to=websecure
+      --entrypoints.web.http.redirections.entryPoint.scheme=https
+      --entrypoints.web.http.redirections.entrypoint.permanent=true
     cpuset: 20-23
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -85,9 +86,11 @@ services:
     labels:
       <<: [ *egl-desktop-labels ]
       description: Software Development
-      traefik.http.routers.9090.tls: true
-      traefik.http.routers.9090.entrypoints: websecure
-      traefik.http.routers.9090.rule: Host(`desktop.development.${DOMAIN_NAME}`)
+      traefik.http.routers.desktop-development.rule: Host(`desktop.development.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-development.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-development.service: desktop-development
+      traefik.http.routers.desktop-development.tls: true
+      traefik.http.routers.desktop-development.entrypoints: websecure
     environment:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_DEVELOPMENT_PASSWORD}
@@ -113,9 +116,11 @@ services:
     labels:
       <<: [ *egl-desktop-labels ]
       description: Social Media accounts / Browsing
-      traefik.http.routers.9091.tls: true
-      traefik.http.routers.9091.entrypoints: websecure
-      traefik.http.routers.9091.rule: Host(`desktop.socials.${DOMAIN_NAME}`)
+      traefik.http.routers.desktop-socials.rule: Host(`desktop.socials.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-socials.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-socials.service: desktop-socials
+      traefik.http.routers.desktop-socials.tls: true
+      traefik.http.routers.desktop-socials.entrypoints: websecure
     environment:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_SOCIALS_PASSWORD}
@@ -141,9 +146,11 @@ services:
     labels:
       <<: [ *egl-desktop-labels ]
       description: Banking, transactions, etc
-      traefik.http.routers.9092.tls: true
-      traefik.http.routers.9092.entrypoints: websecure
-      traefik.http.routers.9092.rule: Host(`desktop.finance.${DOMAIN_NAME}`)
+      traefik.http.routers.desktop-finance.rule: Host(`desktop.finance.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-finance.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-finance.service: desktop-finance
+      traefik.http.routers.desktop-finance.tls: true
+      traefik.http.routers.desktop-finance.entrypoints: websecure
     environment:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_FINANCE_PASSWORD}
@@ -169,9 +176,11 @@ services:
     labels:
       <<: [ *egl-desktop-labels ]
       description: Torrenting / Mediacenter, Download and Play local media files
-      traefik.http.routers.9093.tls: true
-      traefik.http.routers.9093.entrypoints: websecure
-      traefik.http.routers.9093.rule: Host(`desktop.media.${DOMAIN_NAME}`)
+      traefik.http.routers.desktop-media.rule: Host(`desktop.media.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-media.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-media.service: desktop-media
+      traefik.http.routers.desktop-media.tls: true
+      traefik.http.routers.desktop-media.entrypoints: websecure
     environment:
       <<: [ *egl-desktop-env ]
       PASSWD: ${DESKTOP_MEDIA_PASSWORD}
