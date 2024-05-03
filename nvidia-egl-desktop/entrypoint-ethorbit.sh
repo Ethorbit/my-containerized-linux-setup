@@ -2,14 +2,7 @@
 
 # Send the Docker variables to files that will be sourced by our systemd services
 printenv | sed 's|^|export |' > /etc/default/entrypoint
-#sudo -u user printenv | sed 's|^|export |' > /etc/default/entrypoint
-#
-#cat >> /etc/default/entrypoint << EOL
-#export ENABLE_BASIC_AUTH="${ENABLE_BASIC_AUTH}"
-#export BASIC_AUTH_PASSWORD="${BASIC_AUTH_PASSWORD}"
-#export PASSWD="${PASSWD}"
-#EOL
-#
+
 cat > /etc/default/pulseaudio << EOL
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}"
 export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP}"
@@ -64,10 +57,6 @@ export ENABLE_BASIC_AUTH="${ENABLE_BASIC_AUTH}"
 export BASIC_AUTH_PASSWORD="${BASIC_AUTH_PASSWORD}"
 export PASSWD="${PASSWD}"
 EOL
-
-#printenv | sed 's|^|export |' > /etc/default/selkies-gstreamer
-#sudo -u user printenv | sed 's|^|export |' >> /etc/default/selkies-gstreamer
-
 
 # Finally, System init
 exec /sbin/init --log-level=err "$@"

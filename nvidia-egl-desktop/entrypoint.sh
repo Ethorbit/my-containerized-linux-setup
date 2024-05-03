@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-#source /etc/default/entrypoint
-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -55,8 +53,4 @@ fi
 # Start Fcitx input method framework
 /usr/bin/fcitx &
 
-# Add custom processes right below this line, or within `supervisord.conf` to perform service management similar to systemd
-
-echo "Session Running. Press [Return] to exit."
-while :; do sleep 10; done
-#read
+sleep inf
