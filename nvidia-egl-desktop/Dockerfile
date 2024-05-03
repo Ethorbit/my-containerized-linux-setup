@@ -21,7 +21,9 @@ RUN apt-get update -y &&\
         wget \
         curl \
         iputils-ping \
-        lsof
+        lsof &&\
+    echo "Adding FlatHub remote.." &&\
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 # Basically a port of nestybox/ubuntu-jammy-systemd-docker:latest
 FROM base AS sysbox-systemd-docker
