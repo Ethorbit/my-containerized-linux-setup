@@ -1,5 +1,4 @@
 include:
-  - compose/resources.yml
   - compose/traefik.yml
   - compose/coturn.yml
   - compose/desktop.yml
