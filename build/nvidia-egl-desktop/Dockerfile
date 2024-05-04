@@ -55,6 +55,7 @@ RUN echo "Installing systemd" &&\
     sys-kernel-debug.mount \
     sys-kernel-tracing.mount \
     systemd-resolved.service \
+    systemd-logind.service \
     upower.service &&\
     echo "Installing docker" &&\
     curl -fsSL https://get.docker.com -o get-docker.sh &&\
@@ -76,7 +77,6 @@ RUN echo "Installing systemd" &&\
     /usr/share/man/* \
     /usr/share/local/* &&\
     systemctl enable user-runtime-dir@1000.service
-#systemd-logind.service \
 ADD https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker /etc/bash_completion.d/docker.sh
 STOPSIGNAL SIGRTMIN+3
 EXPOSE 22/tcp
