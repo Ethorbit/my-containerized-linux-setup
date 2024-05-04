@@ -5,6 +5,7 @@ services:
     container_name: coturn-server
     image: coturn/coturn:latest
     network_mode: host
+    cpu_shares: 128
     cpuset: 20-23
     expose:
       - 3478:3478/tcp

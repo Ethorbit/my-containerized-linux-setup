@@ -17,6 +17,7 @@ services:
     environment:
       PASSWD: ${DESKTOP_MEDIA_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_MEDIA_PASSWORD}
+    cpu_shares: 1024
     cpuset: 16-19
     ports:
       - 9093:8080/tcp

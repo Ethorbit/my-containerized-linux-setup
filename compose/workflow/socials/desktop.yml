@@ -17,6 +17,7 @@ services:
     environment:
       PASSWD: ${DESKTOP_SOCIALS_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_SOCIALS_PASSWORD}
+    cpu_shares: 1024
     cpuset: 12-15
     ports:
       - 9091:8080/tcp

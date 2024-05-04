@@ -17,6 +17,7 @@ services:
     environment:
       PASSWD: ${DESKTOP_FINANCE_PASSWORD}
       BASIC_AUTH_PASSWORD: ${DESKTOP_FINANCE_PASSWORD}
+    cpu_shares: 256
     cpuset: 12-15
     ports:
       - 9092:8080/tcp
