@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 source /etc/default/entrypoint
+export XDG_RUNTIME_DIR=/run/user/$(id -u user)
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
