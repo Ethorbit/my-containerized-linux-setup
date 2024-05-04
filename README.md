@@ -1,5 +1,5 @@
 # my-containerized-linux-setup
-Personal OCI container images created to containerize my entire workflow because why not?
+Personal OCI container images created to containerize my entire workflow
 
 ## Why I do this
 I like the idea of isolating groups of tasks from my daily workflow to avoid the risks and problems that come with running everything on a single instance; problems can range from dependency issues and conflicts to security and privacy concerns.
