@@ -1,5 +1,6 @@
 [Unit]
 Description=Systemd port of nvidia-egl-docker's 'entrypoint' supervisor service
+Requires=user@1000.service
 
 [Service]
 Type=simple

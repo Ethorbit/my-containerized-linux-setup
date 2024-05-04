@@ -4,10 +4,12 @@ USER root
 #ARG KERNEL_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 ENV XSESSION_START_COMMAND="/usr/bin/startplasma-x11"
+ENV XDG_RUNTIME_DIR=
 ENV EDITOR="vim"
 ENV VISUAL="vim"
 #apt-get install -y linux-tools-${KERNEL_VERSION} &&\
-RUN apt-get update -y &&\
+RUN echo 'export XDG_RUNTIME_DIR=/run/user/$(id -u)' >> /home/user/.bashrc &&\
+    apt-get update -y &&\
     echo "Removing unwanted bloat.." &&\
     apt purge -y \
         nano \
@@ -72,7 +74,8 @@ RUN echo "Installing systemd" &&\
     /var/tmp/* \
     /usr/share/doc/* \
     /usr/share/man/* \
-    /usr/share/local/*
+    /usr/share/local/* &&\
+    systemctl enable user-runtime-dir@1000.service
 #systemd-logind.service \
 ADD https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker /etc/bash_completion.d/docker.sh
 STOPSIGNAL SIGRTMIN+3
@@ -107,6 +110,7 @@ RUN echo "Removing supervisor" &&\
     echo "Enabling supervisor replacement services" &&\
     mkdir -p /etc/systemd/system/multi-user.wants/ &&\
     systemctl enable \
+        user@1000.service \
         entrypoint.service \
         pulseaudio.service \
         selkies-gstreamer.service &&\
