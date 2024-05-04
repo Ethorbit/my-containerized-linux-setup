@@ -10,7 +10,7 @@ The problem with just using traditional virtual machines is that they are heavy 
 * First, necessesities need to be up.
 `docker compose --profile default up -d`
 
-* Next, a workflow is started.
+* Next, a workflow task is started.
 `docker compose --profile development up --build -d`
 
 * Services are assigned their own subdomains, so in this case I will use my development desktop by navigating to: `https://desktop.development.linux`
