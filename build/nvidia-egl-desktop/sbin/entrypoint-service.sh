@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+source /etc/default/entrypoint
+
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -45,9 +47,9 @@ fi
 # Use VirtualGL to run the KDE desktop environment with OpenGL if the GPU is available, otherwise use OpenGL with llvmpipe
 if [ -n "$(nvidia-smi --query-gpu=uuid --format=csv | sed -n 2p)" ]; then
   export VGL_REFRESHRATE="${REFRESH}"
-  sudo HOME=/home/user -Eu user /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm "${XSESSION_START_COMMAND:-/usr/bin/startplasma-x11}" &
+  sudo HOME=/home/user -Eu user /usr/bin/vglrun -d "${VGL_DISPLAY:-egl}" +wm /usr/bin/dbus-launch "${XSESSION_START_COMMAND:-/usr/bin/startplasma-x11}" &
 else
-  sudo HOME=/home/user -Eu user "${XSESSION_START_COMMAND:-/usr/bin/startplasma-x11}" &
+  sudo HOME=/home/user -Eu user /usr/bin/dbus-launch "${XSESSION_START_COMMAND:-/usr/bin/startplasma-x11}" &
 fi
 
 # Start Fcitx input method framework

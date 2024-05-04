@@ -1,0 +1,22 @@
+services:
+  desktop-development:
+    profiles:
+      - development
+    extends:
+      file: ../../common/desktop.yml
+      service: kde-desktop
+    container_name: desktop-development
+    hostname: desktop-development
+    labels:
+      description: Software Development
+      traefik.http.routers.desktop-development.rule: Host(`desktop.development.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-development.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-development.service: desktop-development
+      traefik.http.routers.desktop-development.tls: true
+      traefik.http.routers.desktop-development.entrypoints: websecure
+    environment:
+      PASSWD: ${DESKTOP_DEVELOPMENT_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_DEVELOPMENT_PASSWORD}
+    cpuset: 2-11
+    ports:
+      - 9090:8080/tcp

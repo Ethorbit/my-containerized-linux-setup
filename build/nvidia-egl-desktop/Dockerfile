@@ -1,13 +1,17 @@
 # Parent: ubuntu:22.04
 FROM ghcr.io/selkies-project/nvidia-egl-desktop:22.04-20240425164112 AS base
 USER root
-ARG KERNEL_VERSION
+#ARG KERNEL_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 ENV XSESSION_START_COMMAND="/usr/bin/startplasma-x11"
+ENV EDITOR="vim"
+ENV VISUAL="vim"
+#apt-get install -y linux-tools-${KERNEL_VERSION} &&\
 RUN apt-get update -y &&\
-    apt-get install -y linux-tools-${KERNEL_VERSION} &&\
     echo "Removing unwanted bloat.." &&\
-    apt purge -y printer-driver-cups-pdf \
+    apt purge -y \
+        nano \
+        printer-driver-cups-pdf \
         python3-cups \
         '^libreoffice.*$' \
         okular \
@@ -48,9 +52,8 @@ RUN echo "Installing systemd" &&\
     systemd-modules-load.service \
     sys-kernel-debug.mount \
     sys-kernel-tracing.mount \
-    upower.service \
-    systemd-logind.service \
-    systemd-resolved.service &&\
+    systemd-resolved.service \
+    upower.service &&\
     echo "Installing docker" &&\
     curl -fsSL https://get.docker.com -o get-docker.sh &&\
     sh get-docker.sh &&\
@@ -70,6 +73,7 @@ RUN echo "Installing systemd" &&\
     /usr/share/doc/* \
     /usr/share/man/* \
     /usr/share/local/*
+#systemd-logind.service \
 ADD https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker /etc/bash_completion.d/docker.sh
 STOPSIGNAL SIGRTMIN+3
 EXPOSE 22/tcp
@@ -81,10 +85,8 @@ FROM sysbox-systemd-docker AS nix
 #RUN /install-nix.sh --daemon && rm /install-nix.sh
 
 FROM nix AS supervisor-replacement
-COPY ./bin/*.sh /usr/local/bin
 COPY ./systemd/*.service /etc/systemd/system/
-RUN chmod +x /usr/local/bin/*.sh &&\
-    echo "Removing supervisor" &&\
+RUN echo "Removing supervisor" &&\
     systemctl mask supervisor.service &&\
     rm /etc/supervisord.conf &&\
     apt purge -y supervisor &&\
@@ -110,19 +112,19 @@ RUN chmod +x /usr/local/bin/*.sh &&\
         selkies-gstreamer.service &&\
     echo "hiding Operation not Permitted errors caused by entrypoint's password change" &&\
     echo "Set disable_coredump false" >> /etc/sudo.conf
-
-FROM supervisor-replacement AS updated
-ENV DEBIAN_FRONTEND=readline
-COPY ./entrypoint.sh /etc/entrypoint.sh
-COPY ./entrypoint-ethorbit.sh /etc/entrypoint-ethorbit.sh
-RUN chmod +x /etc/entrypoint.sh /etc/entrypoint-ethorbit.sh
-ENTRYPOINT [ "/etc/entrypoint-ethorbit.sh" ]
+ENTRYPOINT [ "/usr/local/sbin/entrypoint.sh" ]
 CMD [ "bash" ]
 
-# Default is already KDE Plasma
-FROM updated AS kdeplasma
+FROM supervisor-replacement AS bin
+COPY ./bin/* /usr/local/bin
+COPY ./sbin/* /usr/local/sbin
+RUN chmod +x -R /usr/local/bin/ /usr/local/sbin/
+ENV DEBIAN_FRONTEND=readline
 
-#FROM updated AS no-kde
+# Default is already KDE Plasma
+FROM bin AS kdeplasma
+
+#FROM bin AS no-kde
 # ...
 
 #FROM no-kde AS xfce

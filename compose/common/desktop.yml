@@ -1,0 +1,45 @@
+services:
+  desktop:
+    runtime: sysbox-runc
+    #args:
+      #KERNEL_VERSION: ${KERNEL_VERSION}
+    labels:
+      traefik.enable: true
+    environment:
+      TZ: ${HOST_TIMEZONE}
+      WEBRTC_ENCODER: nvh264enc
+      SIZEW: 1920
+      SIZEH: 1080
+      REFRESH: 60
+      DPI: 96
+      CDEPTH: 24
+      TURN_HOST: ${HOST_LOCAL_IPV4}
+      TURN_PORT: 3478
+      TURN_PROTOCOL: udp
+      TURN_TLS: true
+      TURN_SHARED_SECRET: ${TURN_SECRET}
+    volumes:
+      - type: tmpfs
+        target: /dev/shm:rw
+      - /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
+      - /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
+      - /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
+      - /var/lib/lxcfs/proc/stat:/proc/stat:rw
+      - /var/lib/lxcfs/proc/swaps:/proc/swaps:rw
+      - /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
+      - /var/lib/lxcfs/sys/devices/system/cpu/online:/sys/devices/system/cpu/online:rw
+    networks:
+      - desktop
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+  kde-desktop:
+    extends: desktop
+    build:
+      context: ../../build/nvidia-egl-desktop

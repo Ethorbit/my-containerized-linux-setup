@@ -1,0 +1,22 @@
+services:
+  desktop-finance:
+    profiles:
+      - finance
+    extends:
+      file: ../../common/desktop.yml
+      service: kde-desktop
+    container_name: desktop-finance
+    hostname: desktop-finance
+    labels:
+      description: Banking, transactions, etc
+      traefik.http.routers.desktop-finance.rule: Host(`desktop.finance.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-finance.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-finance.service: desktop-finance
+      traefik.http.routers.desktop-finance.tls: true
+      traefik.http.routers.desktop-finance.entrypoints: websecure
+    environment:
+      PASSWD: ${DESKTOP_FINANCE_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_FINANCE_PASSWORD}
+    cpuset: 12-15
+    ports:
+      - 9092:8080/tcp

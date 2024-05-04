@@ -1,0 +1,23 @@
+services:
+  desktop-media:
+    profiles:
+      - media
+    extends:
+      file: ../../common/desktop.yml
+      service: kde-desktop
+    container_name: desktop-media
+    hostname: desktop-media
+    labels:
+      description: Torrenting / Mediacenter, Download and Play local media files
+      traefik.http.routers.desktop-media.rule: Host(`desktop.media.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-media.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-media.service: desktop-media
+      traefik.http.routers.desktop-media.tls: true
+      traefik.http.routers.desktop-media.entrypoints: websecure
+    environment:
+      PASSWD: ${DESKTOP_MEDIA_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_MEDIA_PASSWORD}
+    cpuset: 16-19
+    ports:
+      - 9093:8080/tcp
+

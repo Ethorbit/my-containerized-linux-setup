@@ -4,7 +4,7 @@ Description=Systemd port of nvidia-egl-docker's 'pulseaudio' supervisor service
 [Service]
 User=user
 Type=simple
-ExecStart=/usr/local/bin/pulseaudio.sh
+ExecStart=/usr/local/bin/pulseaudio-service.sh
 Restart=on-failure
 RestartSec=5
 

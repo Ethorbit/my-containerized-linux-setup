@@ -1,0 +1,20 @@
+services:
+  traefik:
+    profiles:
+      - default
+    container_name: traefik
+    image: traefik:v2.5
+    network_mode: host
+    command:
+      --api.dashboard=false
+      --providers.docker.endpoint=unix:///var/run/docker.sock
+      --providers.docker.exposedbydefault=false
+      --entrypoints.web.address=:80
+      --entrypoints.websecure.address=:443
+      --entrypoints.web.http.redirections.entryPoint.to=websecure
+      --entrypoints.web.http.redirections.entryPoint.scheme=https
+      --entrypoints.web.http.redirections.entrypoint.permanent=true
+    cpuset: 20-23
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped

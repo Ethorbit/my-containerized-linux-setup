@@ -1,0 +1,22 @@
+services:
+  desktop-socials:
+    profiles:
+      - socials
+    extends:
+      file: ../../common/desktop.yml
+      service: kde-desktop
+    container_name: desktop-socials
+    hostname: desktop-socials
+    labels:
+      description: Social Media accounts / Browsing
+      traefik.http.routers.desktop-socials.rule: Host(`desktop.socials.${DOMAIN_NAME}`)
+      traefik.http.services.desktop-socials.loadbalancer.server.port: 8080
+      traefik.http.routers.desktop-socials.service: desktop-socials
+      traefik.http.routers.desktop-socials.tls: true
+      traefik.http.routers.desktop-socials.entrypoints: websecure
+    environment:
+      PASSWD: ${DESKTOP_SOCIALS_PASSWORD}
+      BASIC_AUTH_PASSWORD: ${DESKTOP_SOCIALS_PASSWORD}
+    cpuset: 12-15
+    ports:
+      - 9091:8080/tcp
