@@ -22,14 +22,11 @@ RUN echo 'export XDG_RUNTIME_DIR=/run/user/$(id -u)' >> /home/user/.bashrc &&\
         '^wine.*$' &&\
     echo "Adding tools.." &&\
     apt-get install -y \
-        flatpak \
         git \
         wget \
         curl \
         iputils-ping \
-        lsof &&\
-    echo "Adding FlatHub remote.." &&\
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        lsof
 
 # Basically a port of nestybox/ubuntu-jammy-systemd-docker:latest
 # with a few changes to get it compatible with parent
@@ -85,9 +82,20 @@ ADD https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/con
 STOPSIGNAL SIGRTMIN+3
 EXPOSE 22/tcp
 
-FROM sysbox-systemd-docker AS nix
-#COPY nix-2.22.0.sh /install-nix.sh
-#RUN /install-nix.sh --daemon && rm /install-nix.sh
+FROM sysbox-systemd-docker AS flatpak
+RUN apt-get update -y && apt-get install -y flatpak &&\
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+USER user
+RUN flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+USER root
+
+FROM flatpak AS nix
+COPY ./sbin/nix-2.22.0.sh /usr/local/sbin/install-nix.sh
+COPY ./systemd/nix-daemon.service /etc/systemd/system/nix-daemon.service
+RUN chmod +x /usr/local/sbin/install-nix.sh &&\
+    /usr/local/sbin/install-nix.sh --daemon &&\
+    rm /usr/local/sbin/install-nix.sh &&\
+    systemctl enable nix-daemon.service
 
 FROM nix AS supervisor-replacement
 COPY ./systemd/user@1000.service /etc/systemd/system/user@1000.service
