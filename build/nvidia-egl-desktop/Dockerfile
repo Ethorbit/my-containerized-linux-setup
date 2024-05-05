@@ -32,6 +32,7 @@ RUN echo 'export XDG_RUNTIME_DIR=/run/user/$(id -u)' >> /home/user/.bashrc &&\
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 # Basically a port of nestybox/ubuntu-jammy-systemd-docker:latest
+# with a few changes to get it compatible with parent
 FROM base AS sysbox-systemd-docker
 RUN echo "Installing systemd" &&\
     apt-get install -y \
@@ -56,7 +57,10 @@ RUN echo "Installing systemd" &&\
     sys-kernel-tracing.mount \
     systemd-resolved.service \
     systemd-logind.service \
-    upower.service &&\
+    upower.service \
+    systemd-hostnamed.service \
+    systemd-localed.service \
+    systemd-timedated.service &&\
     echo "Installing docker" &&\
     curl -fsSL https://get.docker.com -o get-docker.sh &&\
     sh get-docker.sh &&\
@@ -76,18 +80,20 @@ RUN echo "Installing systemd" &&\
     /usr/share/doc/* \
     /usr/share/man/* \
     /usr/share/local/*
+COPY ./systemd/overrides/accounts-daemon.service /etc/systemd/system/accounts-daemon.service
 ADD https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker /etc/bash_completion.d/docker.sh
 STOPSIGNAL SIGRTMIN+3
 EXPOSE 22/tcp
-#ENTRYPOINT [ "/sbin/init", "--log-level=err" ]
-#CMD [ "bash" ]
 
 FROM sysbox-systemd-docker AS nix
 #COPY nix-2.22.0.sh /install-nix.sh
 #RUN /install-nix.sh --daemon && rm /install-nix.sh
 
 FROM nix AS supervisor-replacement
-COPY ./systemd/*.service /etc/systemd/system/
+COPY ./systemd/user@1000.service /etc/systemd/system/user@1000.service
+COPY ./systemd/entrypoint.service /etc/systemd/system/entrypoint.service
+COPY ./systemd/pulseaudio.service /etc/systemd/system/pulseaudio.service
+COPY ./systemd/selkies-gstreamer.service /etc/systemd/system/selkies-gstreamer.service
 RUN echo "Removing supervisor" &&\
     systemctl mask supervisor.service &&\
     rm /etc/supervisord.conf &&\
