@@ -1,12 +1,19 @@
-# my-containerized-linux-setup
+# DISCONTINUED
+
+I have migrated my setup to [NixOS](https://nixos.org/) because I prefer NixOS container configuration compared to docker images. I HIGHLY recommend using Selkies-Gstreamer with Nix containers because you can configure them as if they were standalone NixOS installs, which is incredibly powerful (for example, you can load up any desktop or window manager config in seconds and you could reuse the desktop and theming configuration from your host and throw it into the desktop containers).
+
+My NixOS configs are [here](https://github.com/Ethorbit/nixos-configs/tree/master), which is where you can find my Selkies-Gstreamer nvidia-egl-desktop port among other things.
+
+
+## my-containerized-linux-setup
 Containers that make up my entire workflow
 
-## Why I do this
+### Why I do this
 I like the idea of isolating groups of tasks from my daily workflow to avoid the risks and problems that come with running everything on a single instance; problems can range from dependency issues and conflicts to security and privacy concerns.
 
 The problem with just using traditional virtual machines is that they are heavy on resources and cannot have the GPU shared without spendy vGPU licensing. This project solves virtual machine limitations by instead using free and open-source OCI containerization to share the host's resources between isolated processes. The desktops are streamed over WebRTC, providing the full graphical performance; this is scalable, limited only by the system's available resources.
 
-## Usage
+### Usage
 * First, necessesities need to be up.
 `docker compose --profile default up -d`
 
@@ -15,7 +22,7 @@ The problem with just using traditional virtual machines is that they are heavy 
 
 * Services are assigned their own subdomains, so in this case I will use my development desktop by navigating to: `https://desktop.development.linux`
 
-## Notes
+### Notes
 * Some automatated variables are needed, which are generated as an .env file by the generate-env.sh bash script.
 * Desktops are configured to use the [Sysbox container runtime](https://github.com/nestybox/sysbox) which needs to be installed. Sysbox allows containers to be more "VM-Like" without compromising on performance, allowing them to run things that containers don't typically run, such as Systemd and Docker.
 
